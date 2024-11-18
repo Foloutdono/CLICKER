@@ -1,0 +1,39 @@
+:root {
+    --main-color: rgb(171, 255, 200);  
+}
+html {
+	height: 100%;
+}
+body {
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	align-content: flex-start;
+	height: 100%;
+}
+#clickerZone {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	width: 30%;
+	height: 100%;
+	flex-grow: 1;
+}
+img {
+	width: 100%;
+}
+#clicker {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 60%;
+	height: 50%;
+}
+.separation {
+	background: var(--main-color);
+}
+#truc {
+	height: 100%;
+  	width: 1rem;
+}
