@@ -49,6 +49,7 @@ function Component(name, value, price) {
 		this.button.children[3].textContent = this.nb;
 	};
 }
+
 let components = {};
 function init() {
 	fillComponents();
@@ -67,20 +68,23 @@ function init() {
 }
 function buyComp(comp, nb) {
 	return () => {
-		components[comp].nb += nb;
-		for (let i = 0; i < nb; i++) {
-			components[comp].newPrice();
+		if (components[comp].price <= nbFLOPS) {
+			nbFLOPS -= components[comp].price;
+			components[comp].nb += nb;
+			for (let i = 0; i < nb; i++) {
+				components[comp].newPrice();
+			}
+			img = document.createElement("img");
+			img.src = `assets/${comp}.png`;
+			iDeck = 0;
+			while(iDeck < divRack.children.length && divRack.children[iDeck].id != comp) {
+				iDeck += 2;
+			}
+			if (iDeck < divRack.children.length) {
+				divRack.children[iDeck].appendChild(img);
+			}
+			components[comp].updateButton();
 		}
-		img = document.createElement("img");
-		img.src = `assets/${comp}.png`;
-		iDeck = 0;
-		while(iDeck < divRack.children.length && divRack.children[iDeck].id != comp) {
-			iDeck += 2;
-		}
-		if (iDeck < divRack.children.length) {
-			divRack.children[iDeck].appendChild(img);
-		}
-		components[comp].updateButton();
 	};
 }
 function clickOnClicker() {
@@ -134,7 +138,7 @@ function update() {
 	updateNbFLOPS();
 }
 function updateNbFLOPS() {
-	divNbFLOPS.textContent = nbFLOPS;
+	divNbFLOPS.textContent = nbFLOPS % 1 != 0 ? nbFLOPS.toFixed(1): nbFLOPS;
 }
 function updateFlops() {
 	for (let comp in components) {
@@ -154,8 +158,8 @@ function fillRack() {
 	}
 }
 function fillComponents() {
-	components["gamer"] = new Component("gamer", 1, 10)
-	components["gpu"] = new Component("gpu", 2, 100)
+	components["gamer"] = new Component("gamer", 0.1, 15)
+	components["gpu"] = new Component("gpu", 2, 10000)
 
 	for(let comp in components) {
 		components[comp].createButton();
