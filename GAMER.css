@@ -1,8 +1,13 @@
 :root {
-    --main-color: rgb(171, 255, 200);  
+    --main-color: rgba(9, 179, 26, 0.88);  
+    --main-color-hover: rgb(0,255,26); 
 }
 html {
 	height: 100%;
+	user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 body {
 	margin: 0;
@@ -11,17 +16,38 @@ body {
 	flex-direction: column;
 	align-content: flex-start;
 	height: 100%;
+	background-color: #111;
+	color: white;
 }
-#clickerZone {
+#stockZone, #boutiqueZone, #clickerZone {
 	display: flex;
 	align-items: center;
 	flex-direction: column;
+	height: 100%;
+}
+#clickerZone {
 	width: 30%;
 	height: 100%;
+}
+#boutiqueZone {
+	width: 15%;
+}
+#stockZone {
+	width: 53%;
+}
+#rack {
+	color: black;
+	width: 100%;
+	height: 100%;
 	flex-grow: 1;
+	background-color: white;
+	overflow-y:scroll;
 }
 img {
 	width: 100%;
+	user-drag: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
 }
 #clicker {
 	display: flex;
@@ -30,10 +56,67 @@ img {
 	width: 60%;
 	height: 50%;
 }
-.separation {
-	background: var(--main-color);
+#temp {
+	width: 40%;
 }
-#truc {
+.separation, .separationB {
+	background: var(--main-color);
+	box-shadow: 0em 0em 20em 1.2em var(--main-color);
+}
+.separation:hover, .separationB:hover {
+	box-shadow: 0em 0em 20em 1.5em var(--main-color);
+	background: var(--main-color-hover);
+	transition: all 0.5s;
+}
+.separation {
 	height: 100%;
-  	width: 1rem;
+  	width: 1%;
+}
+.separationB {
+	height: 1rem;
+  	width: 100%;
+}
+.fallingGPU {
+	position: absolute;
+	width: 2.5rem;
+	height: 2.5rem;
+}
+.deck {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	height: 12rem;
+	overflow: hidden;
+}
+.deck img {
+	width: 2rem;
+	height: fit-content;
+	min-height: 50%;
+	filter: drop-shadow(0 0 0.1rem black);
+}
+.buyB {
+	display: flex;
+	flex-direction: raw;
+	flex-wrap: nowrap;
+	width: 100%;
+	background-color: white;
+	height: 6rem;
+	color: black;
+	justify-content: space-between;
+}
+.buyBImg {
+	width: 100%;
+	height: auto;
+}
+.buyBImgZone {
+	width: 30%;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+}
+.buyBNb {
+	color: red;
+}
+.buyBPrice {
+	color: blue;
 }
