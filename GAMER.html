@@ -15,6 +15,10 @@
         <div id="nbFLOPS">
         </div>
       </div>
+      <div id="gain">
+        Flops per sec
+        <div id="flopsPerSec"></div>
+      </div>
       <div id="clicker">
         <img src="assets/gpu.png">
       </div>
@@ -26,8 +30,11 @@
 
     <div class="separation"> </div>
 
-    <div id="stockZone">
-      Stock
+    <div id="game">
+      <div id="arena">
+        
+      </div>
+      <div class="separationB"></div>
       <div id="rack">
       </div>
     </div>
@@ -35,9 +42,30 @@
     <div class="separation"></div>
 
     <div id="boutiqueZone">
-      <div class="Title">Boutique</div>
-      <div class="buyB" id="gamerB"></div>
-      <div class="buyB" id="gpuB"></div>
+      <div class="title">Boutique</div>
+      <div id="upgradesZone">
+        <div class="title2">upgrades</div>
+        <div id="upgrades">
+          <div id='up'></div>
+        </div>
+      </div>
+      <div id="componentsZone">
+        <div class="title2">components</div>
+        <div id="components">
+          <div class="buyB" id="gamerB"></div>
+          <div class="buyB" id="gpuB"></div>
+          <div class="buyB" id="rackB"></div>
+        </div>
+      </div>
     </div>
+
+    <div id="customPrompt" class="hidden">
+        <div class="promptBox">
+          <p id="promptMessage"></p>
+          <input type="text" id="promptInput" />
+          <button onclick="submitPrompt()">OK</button>
+          <button onclick="closePrompt()">Cancel</button>
+        </div>
+      </div>
   </body>
 </html>
