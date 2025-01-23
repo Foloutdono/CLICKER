@@ -49,7 +49,7 @@ body {
 	display: flex;
 	align-items: center;
 	flex-direction: column;
-	justify-content: flex-end;
+	justify-content: space-between;
 	height: 100%;
 	width: 65%;
 }
@@ -133,7 +133,7 @@ img {
 	height: 100%;
 }
 .buyBImgZone {
-	width: 30%;
+	width: 7rem;
 	overflow: hidden;
 	display: flex;
 	justify-content: center;
@@ -178,6 +178,30 @@ img {
 .title2 {
 	background-color: var(--title2-color);
 	color: var(--main-color-hover);
+}
+#ressources {
+	display: flex;
+	flex-direction: row;
+	text-align: center;
+	width: 100%;
+	height: auto;
+}
+#gold {
+	display: flex;
+	flex-direction: row;
+}
+#nbGolds {
+	width: 1rem;
+}
+#ressources * {
+	align-items: center;
+}
+#gold img {
+	width: 3rem;
+	height: 3rem;
+}
+.isSelected {
+	box-shadow: inset 0em 0em 2em 0.05em red;
 }
 
 
