@@ -6,6 +6,8 @@
     --title2-color: #FFFFFF;
 
     --button-color: #C0C0B5;
+
+    --font-size-buyb-price: 1.2rem;
 }
 #up {
 	width: 100%;
@@ -26,7 +28,7 @@ body {
 	flex-direction: column;
 	align-content: flex-start;
 	height: 100%;
-	background-color: #111;
+	background-color: #314054;
 	color: white;
 	overflow: hidden;
 }
@@ -47,9 +49,7 @@ body {
 }
 #game {
 	display: flex;
-	align-items: center;
 	flex-direction: column;
-	justify-content: space-between;
 	height: 100%;
 	width: 65%;
 }
@@ -57,6 +57,7 @@ body {
 	width: 100%;
 	height: auto;
 	align-self: center;
+	background-color: #98949a;
 }
 img {
 	width: 100%;
@@ -80,9 +81,9 @@ img {
 	background: var(--main-color);
 }
 .separation:hover, .separationB:hover {
-	box-shadow: 0em 0em 20em 1.5em var(--main-color-hover);
+	box-shadow: 0em 0em 2em 0.5em var(--main-color-hover);
 	background: var(--main-color-hover);
-	transition: all 0.6s;
+	transition: all 0.3s ease-out;
 }
 .separation {
 	height: 100%;
@@ -113,14 +114,14 @@ img {
 }
 .buyB {
 	display: flex;
-	flex-direction: raw;
+	flex-direction: row;
 	flex-wrap: nowrap;
 	width: 100%;
 	background-color: var(--button-color);
 	height: 6rem;
 	color: black;
 	opacity: 0.9;
-	justify-content: space-between;
+	font-weight: bold;
 }
 .buyB.unAffordable:hover {
 	opacity: 0.7;
@@ -128,36 +129,53 @@ img {
 .buyB:not(.unAffordable):hover {
 	opacity: 1;
 }
-.buyBImg {
+.buyBObjImg {
 	width: auto;
 	height: 100%;
 }
-.buyBImgZone {
-	width: 7rem;
+.buyBObjImgZone {
+	width: 30%;
 	overflow: hidden;
 	display: flex;
 	justify-content: center;
+	margin-right: 1rem;
+	padding: 0.15rem;
 }
-.buyBNb {
-	color: red;
+.buyBNamePrice {
+	z-index: 2;
+	width: 35%;
+	padding-top: 1rem;
+	display: flex;
+	flex-direction: column;
+}
+.buyBName {
+	font-size: 1.5rem;
+}
+.buyBPriceZone {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 .buyBPrice {
-	color: blue;
+	font-size: var(--font-size-buyb-price);
+}
+.buyBGoldCoinImgZone {
+	padding-left: 0.2rem;
+	width: var(--font-size-buyb-price);
+	height: var(--font-size-buyb-price);
+	overflow: hidden;
+}
+.buyBNb {
+	position: relative;
+	z-index: 1;
+	color: darkgray;
+	font-size: 6rem;
+	text-align: center;
+	left: 2rem;
+	bottom: 0.5rem;
 }
 .unAffordable {
 	opacity: 0.6;
-}
-#name {
-	font-size: 3rem;
-	font-weight: bold;
-	background-color: grey;
-	border: 1px solid white;
-	border-radius: 1rem;
-	margin-top: 1rem;
-	padding: 0.5rem 1rem;
-}
-#name:hover {
-	background-color: var(--main-color-hover);
 }
 #score, #gain {
 	display: flex;
@@ -183,67 +201,95 @@ img {
 	display: flex;
 	flex-direction: row;
 	text-align: center;
-	width: 100%;
-	height: auto;
+	height: 4rem;
+	margin-left: 1rem;
 }
-#gold {
+#infoBar {
+	display: flex;
+	width: 100%;
+	height: 4rem;
+	justify-content: space-between;
+	padding: 1rem 0 1rem 0;
+}
+#gold, #pv {
 	display: flex;
 	flex-direction: row;
+	padding-right: 0.5rem;
 }
 #nbGolds {
-	width: 1rem;
+	width: auto;
 }
 #ressources * {
 	align-items: center;
 }
-#gold img {
-	width: 3rem;
-	height: 3rem;
+#gold img, #pv img {
+	width: 4rem;
+	height: 4rem;
+}
+#wave {
+	font-size: 4rem;
+	font-weight: bold;
 }
 .isSelected {
 	box-shadow: inset 0em 0em 2em 0.05em red;
 }
 
+#cards {
+	display: flex;
+	justify-content: space-around;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+}
+.card {
+	width: 20%;
+	height: 65%;
+	margin-top: auto;
+	margin-bottom: auto;
+	background: rgb(64,0,13);
+	background: linear-gradient(180deg, rgba(64,0,13,1) 4%, rgba(102,0,20,1) 13%, rgba(147,0,30,1) 31%, rgba(148,0,30,1) 58%, rgba(145,0,30,1) 72%, rgba(128,0,26,1) 83%, rgba(89,0,18,1) 99%);
 
+	border-style: solid solid solid; solid;
+	border-width: 0.8rem;
+	border-radius: 1rem;
+	border-image: linear-gradient(180deg, rgba(166,124,0,1) 4%, rgba(191,155,48,1) 14%, rgba(255,195,15,1) 28%, rgba(213,175,65,1) 44%, rgba(255,191,0,1) 64%, rgba(255,207,64,1) 77%, rgba(166,124,0,1) 99%) 1;
+}
+.cardTitle {
+	padding-top: 3rem;
+	text-align: center;
+	font-size: 2.5rem;
+	font-weight: bold;
+}
+.cardDescription {
+	word-wrap: break-word;
+	width: auto;
+	padding-left: 2rem;
+	padding-right: 2rem;
+	font-size: 1.5rem;
+}
+.hidden {
+	display: none;
+}
+.card:hover {
+	box-shadow: 0em 0em 2em 0.05em gold;
+}
 
-/*---------------------------------*/
-#customPrompt {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#towerUpgrade {
+	width: auto;
+	height: 100%;
+	background-color: lightgreen;
+	border: none;
+	padding: 0.3rem 0.4rem 0.3rem 0.4rem;
+	margin-right: 1rem;
+	border-radius: 0.5rem;
 }
-.promptBox {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  width: 300px;
+#towerUpgrade:hover {
+	box-shadow: 0em 0em 2em 0.05em lemonchiffon;
 }
-.promptBox input {
-  width: 100%;
-  margin: 10px 0;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.promptBox button {
-  margin: 5px;
-  padding: 8px 12px;
-  border: none;
-  background-color: #007BFF;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.promptBox button:hover {
-  background-color: #0056b3;
+
+#towerUpgrade img {
+	width: 100%;
+	height: 100%;
 }
 
 .pixelated {

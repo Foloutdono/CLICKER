@@ -7,9 +7,6 @@
   </head>
   <body>
     <div id="clickerZone">
-      <div id="name">
-        Name
-      </div>
       <div id="score">
         Nb Flops
         <div id="nbFLOPS">
@@ -28,16 +25,23 @@
     <div class="separation"> </div>
 
     <div id="game">
-      <div id="ressources">
-        <div id="gold">
-          <img src="assets/gold.png"/>
-          <div id="nbGolds">0</div>
+      <div id="infoBar">
+        <div id="ressources">
+          <div id="gold">
+            <img src="assets/gold.png"/>
+            <div id="nbGolds">0</div>
+          </div>
+          <div id="pv">
+            <img src="assets/heart.png"/>
+            <div id="nbPv">0</div>
+          </div>
         </div>
+        <div id="wave"></div>
+        <button id="towerUpgrade"><img src="assets/coffre.png"/></button>
       </div>
-      <div id="wave">
-      </div>
-      <canvas id="arena" width="1925" height="1080"class="pixelated">
-      </canvas>
+      <div class="separationB"></div>
+      <canvas id="arena" width="1925" height="1079"class="pixelated"></canvas>
+      <div class="separationB"></div>
     </div>
 
     <div class="separation"></div>
@@ -59,19 +63,22 @@
       </div>
       <div id="towersZone">
         <div class="title2">towers</div>
-        <div id="towers">
-          <div class="buyB" id="tier1B"></div>
-        </div>
+        <div id="towers"></div>
       </div>
     </div>
-
-    <div id="customPrompt" class="hidden">
-        <div class="promptBox">
-          <p id="promptMessage"></p>
-          <input type="text" id="promptInput" />
-          <button onclick="submitPrompt()">OK</button>
-          <button onclick="closePrompt()">Cancel</button>
-        </div>
+    <div id="cards" class="hidden">
+      <div id="card1" class="card">
+        <p class="cardTitle"></p>
+        <p class="cardDescription"></p>
       </div>
+      <div id="card2" class="card">
+        <p class="cardTitle"></p>
+        <p class="cardDescription"></p>
+      </div>
+      <div id="card3" class="card">
+        <p class="cardTitle"></p>
+        <p class="cardDescription"></p>
+      </div>
+    </div>
   </body>
 </html>

@@ -1,102 +1,93 @@
 class Game {
+	static NB_UNITS_TYPES = 4;
 	static nbFLOPS = 50;
-	static globalMultiplier = 1;
-	static gold = 0;
-	static upgrades = {};
-	static components = {};
+	static nbGolds = 32;
+	static nbPv = 100;
 
 	static divFlopsPerSec;
 	static divNbFLOPS;
+	static divNbGolds;
 	static divRack;
 	static divUpgrades;
-	static divName;
+	static divNbPv;
+	static bTowerUpgrade;
 
-	static unitsTypes = [];
-	static towersTypes = [];
-	static cellTypes = [];
+	static upgrades = {};
+	static components = {};
+	static unitsTypes = {};
+	static towersTypes = {};
+	static cellTypes = {};
+	static towersUpgrades = {};
+
+	static addFlops(value) {
+		Game.nbFLOPS += value;
+	}
+	static addGolds(value) {
+		Game.nbGolds += value;
+	}
+	static addPv(value) {
+		Game.nbPv += value;
+	}
 
 	static init() {
-		Game.fillComponents();
-		Game.fillUpgrades();
 		Game.initTypes();
 		Game.divNbFLOPS = document.getElementById("nbFLOPS");
+		Game.divNbGolds = document.getElementById("nbGolds");
+		Game.divNbPv = document.getElementById("nbPv");
 		Game.divRack = document.getElementById("rack");
-		Game.divName = document.getElementById("name");
 		Game.divFlopsPerSec = document.getElementById("flopsPerSec");
 		Game.divUpgrades = document.getElementById("upgrades");
+		Game.bTowerUpgrade = document.getElementById("towerUpgrade");
 
+		Game.bTowerUpgrade.onclick = Game.buyTowerUpgrade;
 		Clicker.init();
 		Arena.init();
 		Wave.init();
-
-		Game.divName.addEventListener("click", getValue(Game.divName, "What's your name ?"));
+		LootBox.init();
 
 		setInterval(Game.update, 30);
-		setInterval(Game.addFlops, 1000);
+		setInterval(Game.addProducedFlops, 1000);
 	}
-	static update() {
-		if (document.visibilityState == "visible") {
-			Arena.update();
-			Game.updateNbFLOPS();
-			Game.updateFlopsPerSec();
-			Game.updateAvailableComps();
-			Wave.update();
-		}
+
+	static initTypes() {
+		Game.initUnitsTypes();
+		Game.initTowersTypes();
+		Game.initTowersUpgrades();
+		Game.initCellsTypes();
+		Game.initComponentsTypes();
+		Game.initUpgradesTypes();
 	}
-	static addFlops() {
-		for (let comp in Game.components) {
-			Game.nbFLOPS += Game.components[comp].flopParSecComp();
-		}
-	}
-	static updateFlopsPerSec() {
-		let flopsPerSec = 0;
-		for (let comp in Game.components) {
-			flopsPerSec += Game.components[comp].flopParSecComp();
-		}
-		Game.divFlopsPerSec.textContent = flopsPerSec % 1 != 0 ? flopsPerSec.toFixed(1): flopsPerSec;
-	}
-	static updateNbFLOPS() {
-		Game.divNbFLOPS.textContent = Game.nbFLOPS % 1 != 0 ? Game.nbFLOPS.toFixed(1): Game.nbFLOPS;
-	}
-	static updateAvailableComps() {
-		for (let comp in Game.components) {
-			if (Game.components[comp].currentPrice > Game.nbFLOPS) {
-				Game.components[comp].button.classList.add("unAffordable");
-			} else {
-				Game.components[comp].button.classList.remove("unAffordable");
-			}
-		}
-	}
-	static fillComponents() {
+	static initComponentsTypes() {
 		Game.components["gamer"] = new Component("gamer", 0.1, 15);
 		Game.components["gpu"] = new Component("gpu", 2, 100);
-
-		for(let comp in Game.components) {
-			Game.components[comp].createButton();
-		}
 	}
-	static fillUpgrades() {
+	static initUpgradesTypes() {
 		Game.upgrades["truc"] = new Upgrade("truc", "gpu", 1, 2, "type", "this.price == 1");
 
 		for(let up in Game.upgrades) {
 			Game.upgrades[up].createButton();
 		}
 	}
-	static initTypes() {
-		Game.initUnitsTypes();
-		Game.initTowerTypes();
-		Game.initCellTypes();
-	}
 	static initUnitsTypes() {
-		// name, pv, speed, color
-		Game.unitsTypes["normal"] = new UnitType("normal", 1, 10, 'magenta');
+		// name, pv, speed, goldValue
+		Game.unitsTypes["level1"] = new UnitType("level1", 1, 10, 1);
+		Game.unitsTypes["level2"] = new UnitType("level2", 3, 13, 2);
+		Game.unitsTypes["level3"] = new UnitType("level3", 6, 10, 3);
+		Game.unitsTypes["level4"] = new UnitType("level4", 9, 10, 4);
 	}
-	static initTowerTypes() {
-		// ID, pv, power, attackSpeed, range, color, nbTargetsMax
-		Game.towersTypes["tier1"] = new TowerType("tier1", 100, 1, 0.8, 1.5, 1);
-		Game.towersTypes["tier1"].createButton();
+	static initTowersTypes() {
+		// name, pv, power, attackSpeed, range, nbTargetsMax, currentPrice
+		Game.towersTypes["turret"] = new TowerType("turret", 100, 1, 0.8, 1.5, 1, 25);
+		Game.towersTypes["doubleTurret"] = new TowerType("doubleTurret", 100, 1, 0.8, 1.5, 2, 45);
+		Game.towersTypes["greenLaser"] = new TowerType("greenLaser", 100, 2, 1, 2, 2, 100);
 	}
-	static initCellTypes() {
+	static initTowersUpgrades() {
+		// name, property, type, values, ...targets
+		Game.towersUpgrades["Speed"] = new TowerUpgrade("Speed", "attackSpeed", "m", [10, 10, 10, 10], "turret", "doubleTurret", "greenLaser");
+		Game.towersUpgrades["Power"] = new TowerUpgrade("Power", "power", "a", [1, 1, 1, 1], "turret", "doubleTurret", "greenLaser");
+		Game.towersUpgrades["Target"] = new TowerUpgrade("Target", "nbTargetsMax", "a", [1, 1, 1, 1], "turret", "doubleTurret", "greenLaser");
+	}
+	static initCellsTypes() {
 		Game.cellTypes["tile"] = new CellType("tile");
 
 		Game.cellTypes["roadH"] = new CellType("roadH");
@@ -110,6 +101,95 @@ class Game {
 		Game.cellTypes["start"] = new CellType("start");
 		Game.cellTypes["end"] = new CellType("end");
 	}
+
+	static createButton(src, obj) {
+		let button = document.getElementById(`${obj.name}B`)
+		let objImg = document.createElement("img");
+		objImg.src = src;
+		objImg.classList.add("buyBObjImg")
+		let divObjImg = document.createElement("div");
+		divObjImg.classList.add("buyBObjImgZone")
+		divObjImg.appendChild(objImg);
+
+		let divNamePrice = document.createElement("div");
+		divNamePrice.classList.add("buyBNamePrice")
+		let name = document.createElement("div");
+		name.classList.add("buyBName");
+		name.textContent = obj.name.toUpperCase();
+
+		let divPriceZone = document.createElement("div");
+		divPriceZone.classList.add("buyBPriceZone")
+		let price = document.createElement("div");
+		price.classList.add("buyBPrice");
+		price.textContent = obj.currentPrice;
+		let goldCoinImg = document.createElement("img");
+		goldCoinImg.src = "assets/goldCoin.png";
+		goldCoinImg.classList.add("buyBImg")
+		goldCoinImg.classList.add("buyBGoldCoinImg")
+		let divGoldCoinImg = document.createElement("div");
+		divGoldCoinImg.classList.add("buyBGoldCoinImgZone")
+		divGoldCoinImg.appendChild(goldCoinImg);
+
+		divPriceZone.appendChild(price);
+		divPriceZone.appendChild(divGoldCoinImg);
+
+		divNamePrice.appendChild(name);
+		divNamePrice.appendChild(divPriceZone);
+
+		let nb = document.createElement("div");
+		nb.classList.add("buyBNb");
+		nb.textContent = obj.nb;
+
+		button.appendChild(divObjImg);
+		button.appendChild(divNamePrice);
+		button.appendChild(nb);
+		return button;
+	}
+
+	static update() {
+		if (document.visibilityState == "visible") {
+			Arena.update();
+			Game.updateNbFLOPS();
+			Game.updateNbGolds();
+			Game.updateNbPv();
+			Game.updateFlopsPerSec();
+			Game.updateAvailableComps();
+			Wave.update();
+		}
+	}
+	static updateFlopsPerSec() {
+		let flopsPerSec = 0;
+		for (let comp in Game.components) {
+			flopsPerSec += Game.components[comp].flopParSecComp();
+		}
+		Game.divFlopsPerSec.textContent = flopsPerSec % 1 != 0 ? flopsPerSec.toFixed(1): flopsPerSec;
+	}
+	static updateNbFLOPS() {
+		Game.divNbFLOPS.textContent = Game.nbFLOPS % 1 != 0 ? Game.nbFLOPS.toFixed(1): Game.nbFLOPS;
+	}
+	static updateNbGolds() {
+		Game.divNbGolds.textContent = Game.nbGolds % 1 != 0 ? Game.nbGolds.toFixed(1): Game.nbGolds;
+	}
+	static updateNbPv() {
+		Game.divNbPv.textContent = Game.nbPv % 1 != 0 ? Game.nbPv.toFixed(1): Game.nbPv;
+	} 
+	static updateAvailableComps() {
+		for (let comp in Game.components) {
+			if (Game.components[comp].currentPrice > Game.nbFLOPS) {
+				Game.components[comp].button.classList.add("unAffordable");
+			} else {
+				Game.components[comp].button.classList.remove("unAffordable");
+			}
+		}
+	}
+	static addProducedFlops() {
+		for (let comp in Game.components) {
+			Game.addFlops(Game.components[comp].flopParSecComp());
+		}
+	}
+	static buyTowerUpgrade() {
+		LootBox.generate();
+	}
 }
 window.onload = Game.init;
 class Arena {
@@ -117,14 +197,24 @@ class Arena {
 	static ctx;
 	static width;
 	static height;
+
 	static cells = [];
 	static cellSize;
+
 	static path;
+
 	static units = [];
 	static towers = [];
-	static wave = 1;
 
-	static timeBetweenWaves = 6000;
+	static wave = 1;
+	static TIME_BTW_WAVES = 30000;
+
+	static addTower(tower) {
+		Arena.towers.push(tower);
+	}
+	static addUnit(unit) {
+		Arena.units.push(unit);
+	}
 
 	static init() {
 		Arena.canvas = document.getElementById("arena");
@@ -133,22 +223,12 @@ class Arena {
 		Arena.height = Arena.canvas.height;
 		Arena.cellSize = Math.floor(Arena.width/25);
 
-		Arena.canvas.addEventListener("click", Arena.placeTower);
+		Arena.canvas.addEventListener("click", Arena.handleClick);
 
 		Arena.initCells();
 		Arena.initPath();
 		Arena.initUnits();
 		Arena.initTowers();
-	}
-	static update() {
-		Arena.ctx.clearRect(0, 0, Arena.width, Arena.height);
-		Arena.ctx.fillStyle = "white";
-		Arena.ctx.globalAlpha = 1;
-		Arena.ctx.fillRect(0, 0, Arena.width, Arena.height);
-		Arena.drawCells();
-		Arena.drawGrid();
-		Arena.drawUnits();
-		Arena.drawTowers();
 	}
 	static initCells() {
 		for (let y = 0; y < Arena.height-Arena.cellSize; y += Arena.cellSize) {
@@ -160,49 +240,27 @@ class Arena {
 			Arena.cells.push(line);
 		}
 	}
-	static addTower(tower) {
-		Arena.towers.push(tower);
-	}
-	static addUnit(unit) {
-		Arena.units.push(unit);
-	}
-	static spawnWave() {
-		if (document.visibilityState == "visible") {
-			new Wave();
-		} else {
-			clearInterval(Arena.spawnUnitInterval);
-			Arena.restartInterval = setInterval(Arena.restartUnitsSpawning(), 30);
-		}
-	}
 	static initUnits() {
 		Arena.spawnWave();
-		Arena.spawnUnitInterval = setInterval(Arena.spawnWave, Arena.timeBetweenWaves);
+		Arena.spawnUnitInterval = setInterval(Arena.spawnWave, Arena.TIME_BTW_WAVES);
 		setInterval(Arena.updateUnits, 30);
 	}
 	static initTowers() {
 		setInterval(Arena.updateTowers, 30);
 	}
 	static initPath() {
-		Arena.path = new Path({i: 0, j: 0}, {i: 0, j: 5}, {i: 5, j: 5}, {i: 5, j: 0}, {i: 10, j: 0}, {i: 10, j: 3}, {i: 13, j: 3}, {i: 13, j: 9}, {i: 1, j: 9}, {i: 1, j: 24});
+		Arena.path = new Path({i: 0, j: 0}, {i: 0, j: 5}, {i: 5, j: 5}, {i: 5, j: 0}, {i: 10, j: 0},
+		 					{i: 10, j: 3}, {i: 13, j: 3}, {i: 13, j: 7}, {i: 9, j: 7}, {i: 9, j: 9}, {i: 3, j: 9}, {i: 3, j: 8},
+		 					{i: 1, j: 8}, {i: 1, j: 12}, {i: 4, j: 12}, {i: 4, j: 15}, {i: 7, j: 15},
+		 					{i: 7, j: 12}, {i: 11, j: 12}, {i: 11, j: 19}, {i: 3, j: 19}, {i: 3, j: 23}, {i: 8, j: 23}, {i: 8, j: 24});
 	}
-	static restartUnitsSpawning() {
-		return () => {
-			if (document.visibilityState == "visible") {
-				clearInterval(Arena.restartInterval);
-				new Wave();
-				Arena.spawnUnitInterval = setInterval(Arena.spawnWave, Arena.timeBetweenWaves);
-			}
-		}
-	}
-	static drawUnits() {
-		for (let unit of Arena.units) {
-			unit.draw();
-		}
-	}
-	static drawTowers() {
-		for (let tower of Arena.towers) {
-			tower.draw();
-		}
+
+	static update() {
+		Arena.ctx.clearRect(0, 0, Arena.width, Arena.height);
+		Arena.ctx.fillStyle = "white";
+		Arena.ctx.globalAlpha = 1;
+		Arena.ctx.fillRect(0, 0, Arena.width, Arena.height);
+		Arena.draw();
 	}
 	static updateUnits() {
 		if (document.visibilityState == "visible") {
@@ -214,8 +272,8 @@ class Arena {
 						Arena.units = Arena.units.filter(a => a.ID != unit.ID);
 					}
 				} else {
+					console.log(unit.pv);
 					unit.die();
-					Arena.units = Arena.units.filter(a => a.ID != unit.ID);
 				}
 			}
 		}
@@ -227,6 +285,22 @@ class Arena {
 			}
 		}
 	}
+
+	static draw() {
+		Arena.drawCells();
+		Arena.drawUnits();
+		Arena.drawTowers();
+	}
+	static drawUnits() {
+		for (let unit of Arena.units) {
+			unit.draw();
+		}
+	}
+	static drawTowers() {
+		for (let tower of Arena.towers) {
+			tower.draw();
+		}
+	}
 	static drawCells() {
 		for (let line of Arena.cells) {
 			for (let cell of line) {
@@ -234,9 +308,31 @@ class Arena {
 			}
 		}
 	}
-	static drawGrid() {
-		Arena.ctx.fillStyle = '#C0C0C0';
-		Arena.ctx.fillRect(0, Arena.cellSize*Math.floor(Arena.height/Arena.cellSize), Arena.width, Arena.cellSize);
+
+	static spawnWave() {
+		if (document.visibilityState == "visible") {
+			new Wave();
+		} else {
+			clearInterval(Arena.spawnUnitInterval);
+			Arena.restartInterval = setInterval(Arena.restartUnitsSpawning(), 30);
+		}
+	}
+	static restartUnitsSpawning() {
+		return () => {
+			if (document.visibilityState == "visible") {
+				clearInterval(Arena.restartInterval);
+				new Wave();
+				Arena.spawnUnitInterval = setInterval(Arena.spawnWave, Arena.TIME_BTW_WAVES);
+			}
+		}
+	}
+
+	static handleClick() {
+		if (event.shiftKey) {
+			Arena.sellTower();
+		} else {
+			Arena.placeTower();
+		}
 	}
 	static placeTower() {
 		let towerSelected;
@@ -248,11 +344,23 @@ class Arena {
 			}
 			iTowerType++;
 		}
-		if (towerSelected) {
+		if (towerSelected && towerSelected.currentPrice <= Game.nbGolds) {
 			let pos = Arena.getCoord(new Position(Math.floor(event.offsetX), Math.floor(event.offsetY)));
 			if (Arena.enoughSpace(pos)) {
+				Game.addGolds(-towerSelected.currentPrice);
 				Arena.addTower(new Tower(towerSelected.name, pos));
 			}
+		}
+	}
+	static sellTower() {
+		let pos = Arena.getCoord(new Position(Math.floor(event.offsetX), Math.floor(event.offsetY)));
+		let iTower = 0;
+		while (iTower < Arena.towers.length && !Arena.towers[iTower].area.collisionPos(pos)) {
+			iTower++;
+		}
+		if (iTower < Arena.towers.length) {
+			Game.addGolds(Game.towersTypes[Arena.towers[iTower].type].currentPrice * 0.7);
+			Arena.towers.splice(iTower, 1);
 		}
 	}
 	static enoughSpace(pos) {
@@ -261,6 +369,13 @@ class Arena {
 	}
 	static getCoord(pos) {
 		return pos.multFact(Arena.width / Arena.canvas.offsetWidth);
+	}
+}
+class CellType {
+	constructor(name) {
+		this.name = name;
+		this.img = new Image();
+		this.img.src = `assets/cells/${this.name}.png`;
 	}
 }
 class Cell {
@@ -276,29 +391,86 @@ class Cell {
 		this.type = Game.cellTypes[type];
 	}
 }
+class TowerType {
+	constructor(name, pv, power, attackSpeed, range, nbTargetsMax, currentPrice) {
+		this.name = name;
+		this.pv = new TowerStat(pv);
+		this.power = new TowerStat(power);
+		this.attackSpeed = new TowerStat(attackSpeed);
+		this.range = new TowerStat(range);
+		this.nbTargetsMax = new TowerStat(nbTargetsMax);
+		let img = new Image();
+		img.src = `assets/towers/${this.name}/tower.png`;
+		this.img = img;
+
+		this.currentPrice = currentPrice;
+		this.nb = "";
+		this.isSelected = false;
+
+		this.isUnlocked = true;
+
+		this.upgradesAvailable = [];
+
+		let divTowers = document.getElementById("towers");
+		let divTower = document.createElement("div");
+		divTower.classList.add('buyB');
+		divTower.id = `${name}B`;
+		divTowers.appendChild(divTower);
+
+		this.createButton();
+	}
+	shootingSprite(state) {
+		let img = new Image();
+		img.src = `assets/towers/${this.name}/shooting${state}.png`;
+		return img;
+	}
+	createButton() {
+		let src = `assets/towers/${this.name}/tower.png`;
+		this.button = Game.createButton(src, this);
+
+		let isSelected = () => {
+			this.isSelected = !this.isSelected;
+			if (this.isSelected) {
+				this.button.classList.add("isSelected");
+				let iTowerType = 0;
+				let keys = Object.keys(Game.towersTypes);
+				while (iTowerType < keys.length) {
+					if (Game.towersTypes[keys[iTowerType]].isSelected && Game.towersTypes[keys[iTowerType]] != this) {
+						Game.towersTypes[keys[iTowerType]].button.classList.remove("isSelected");
+						Game.towersTypes[keys[iTowerType]].isSelected = false;
+					}
+					iTowerType++;
+				}
+			} else {
+				this.button.classList.remove("isSelected");
+			}
+		}
+		this.button.addEventListener("click", isSelected);
+	} 
+}
 class Tower {
 	static NB_SHOOTING_STATES = 4;
 	constructor(type, pos) {
 		this.pos = pos;
 		this.type = type;
 
-		this.pv = Game.towersTypes[this.type].pv;
-		this.power = Game.towersTypes[this.type].power;
-		this.attackSpeed = Game.towersTypes[this.type].attackSpeed;
+		this.pv = Game.towersTypes[this.type].pv.value();
+		this.power = Game.towersTypes[this.type].power.value();
+		this.attackSpeed = Game.towersTypes[this.type].attackSpeed.value();
 		this.timePerAttack = 1000 / this.attackSpeed;
-		this.nbTargetsMax = Game.towersTypes[this.type].nbTargetsMax;
+		this.nbTargetsMax = Game.towersTypes[this.type].nbTargetsMax.value();
 
-		this.range = Arena.cellSize * Game.towersTypes[this.type].range;
+		this.range = Arena.cellSize * Game.towersTypes[this.type].range.value();
+		this.circle = new Circle(this.pos, this.range);
 		this.area = Tower.area(this.pos);
 		this.sprite = Game.towersTypes[this.type].sprite;
-		this.circle = new Circle(this.pos, this.range);
 		this.isShooting = false;
 		this.shootingState = 0;
 		this.nbFrames = 0;
 	}
 	draw() {
 		let img = Game.towersTypes[this.type].img;
-		if (this.shootingState != 0) {
+		if (this.shootingState != 0 && this.type == "turret") {
 			img = Game.towersTypes[this.type].shootingSprite(this.shootingState);
 			this.nbFrames++;
 			if (this.nbFrames > Math.floor((this.timePerAttack / 30) / Tower.NB_SHOOTING_STATES)) {
@@ -317,6 +489,16 @@ class Tower {
 	}
 	update() {
 		this.attack();
+	}
+	updateStats() {
+		this.pv = Game.towersTypes[this.type].pv.value();
+		this.power = Game.towersTypes[this.type].power.value();
+		this.attackSpeed = Game.towersTypes[this.type].attackSpeed.value();
+		this.timePerAttack = 1000 / this.attackSpeed;
+		this.nbTargetsMax = Game.towersTypes[this.type].nbTargetsMax.value();
+
+		this.range = Arena.cellSize * Game.towersTypes[this.type].range.value();
+		this.circle = new Circle(this.pos, this.range);
 	}
 	attack() {
 		if (!this.isShooting) {
@@ -348,11 +530,21 @@ class Tower {
 		return units;
 	}
 }
+class UnitType {
+	constructor(name, pv, speed, goldValue) {
+		this.name = name;
+		this.pv = pv;
+		this.speed = speed;
+		this.goldValue = goldValue;
+		this.img = new Image();
+		this.img.src = `assets/units/${name}.png`;
+	}
+}
 class Unit {
-	static NB_UNITS = 0;
+	static nbUnits = 0;
 	constructor(type) {
-		this.ID = Unit.NB_UNITS;
-		Unit.NB_UNITS++;
+		this.ID = Unit.nbUnits;
+		Unit.nbUnits++;
 
 		this.currentStep = 1;
 		this.nextPos = Arena.path.nextStep(this.currentStep);
@@ -361,18 +553,17 @@ class Unit {
 		this.area = Unit.area(this.pos); 
 
 		this.type = type;
-		this.color = Game.unitsTypes[this.type].color;
+		console.log(this.type)
 		this.speed = Game.unitsTypes[this.type].speed;
 		this.pv = Game.unitsTypes[this.type].pv;
+		this.goldValue = Game.unitsTypes[this.type].goldValue;
 		this.maxPv = this.pv;
 	}
 	static area(pos) {
-		return new Rectangle(pos.x + Arena.cellSize / 4, pos.y + Arena.cellSize / 4, Arena.cellSize / 2, Arena.cellSize / 2);
+		return new Rectangle(pos.x + Arena.cellSize / 3, pos.y + Arena.cellSize / 3, Arena.cellSize / 2.5, Arena.cellSize / 2.5);
 	}
 	draw() {
-		let img = new Image();
-		img.src = "assets/units.png";
-		Arena.ctx.drawImage(img, 0, 0, 100, 100, this.area.x, this.area.y, this.area.width, this.area.height);
+		Arena.ctx.drawImage(Game.unitsTypes[this.type].img, this.area.x, this.area.y, this.area.width, this.area.height);
 	}
 	updatePosition() {
 		if (this.nextPos) {
@@ -403,35 +594,33 @@ class Unit {
 			this.area = Unit.area(this.pos);
 		}
 	}
-	animationDeath() {
-
-	}
 	die() {
-
+		Game.addGolds(this.goldValue);
+		Arena.units = Arena.units.filter(a => a.ID != this.ID);
 	}
 	win() {
-
+		Game.addPv(this.pv);
 	}
 }
 class Wave {
-	static NB_WAVES = 0;
+	static nbWaves = 0;
 	static divWave;
 
 	static init() {
 		Wave.divWave = document.getElementById("wave");
 	}
 	static update() {
-		Wave.divWave.textContent = `Wave ${Wave.NB_WAVES}`;
+		Wave.divWave.textContent = `Wave ${Wave.nbWaves}`;
 	}
 	constructor() {
-		Wave.NB_WAVES++;
-		this.ID = Wave.NB_WAVES;
+		Wave.nbWaves++;
+		this.ID = Wave.nbWaves;
 		this.generateBatches();
 		this.start();
 		this.timeByBatch = 0;
 	}
 	start() {
-		let timeBetweenBatches = ((Arena.timeBetweenWaves * 0.3) / this.unitsBatches.length);
+		let timeBetweenBatches = ((Arena.TIME_BTW_WAVES * 0.3) / this.unitsBatches.length);
 		for (let iBatch in this.unitsBatches) {
 			setTimeout(this.unitsBatches[iBatch].start(), (this.timeByBatch * iBatch) + timeBetweenBatches);
 		}
@@ -441,10 +630,14 @@ class Wave {
 		let nbBatches = Math.floor(getBaseLog(4, this.ID)) + 1;
 		let minUnits = Math.floor(getBaseLog(2, this.ID)) + 3;
 		let maxUnits = minUnits + 3;
-		this.timeByBatch = (Arena.timeBetweenWaves * 0.6) / nbBatches;
+		let unitsMaxLevel = this.ID % 10;
+		if (unitsMaxLevel > Game.NB_UNITS_TYPES) {
+			unitsMaxLevel = Game.NB_UNITS_TYPES;
+		}
+		this.timeByBatch = (Arena.TIME_BTW_WAVES * 0.6) / nbBatches;
 		for (let iBatch = 0; iBatch < nbBatches; iBatch++) {
 			let nbUnits = getRandomInt(maxUnits, minUnits);
-			this.addBatch(new UnitBatch("normal", nbUnits, this.timeByBatch));
+			this.addBatch(new UnitBatch(`level${getRandomInt(unitsMaxLevel, 1)}`, nbUnits, this.timeByBatch));
 		}
 	}
 	addBatch(batch) {
@@ -470,82 +663,151 @@ class UnitBatch {
 		}
 	}
 }
-class UnitType {
-	constructor(name, pv, speed, color) {
-		this.name = name;
-		this.pv = pv;
-		this.speed = speed;
-		this.color = color;
+class Clicker {
+	static div;
+	static nbClicks = 0;
+	static clickValue = 1;
+	static fallingObjects = [];
+	static divFallingGPUS;
+
+	static init() {
+		Clicker.div = document.getElementById("clicker");
+		Clicker.divFallingGPUS = document.getElementById("fallingGPUS");
+		Clicker.div.addEventListener("click", Clicker.clickOnClicker);
+	}
+	static clickOnClicker() {
+		Game.nbFLOPS += Clicker.clickValue;
+		Clicker.nbClicks++;
+
+		Clicker.effectsClick();
+	}
+	static effectsClick() {
+		let newGPU = document.createElement("img");
+		newGPU.src = `assets/fallingObj${getRandomInt(2)+1}.png`;
+		newGPU.classList.add("fallingGPU");
+
+		newGPU.topValue = newGPU.x + getRandomInt(Clicker.div.clientWidth-Clicker.div.clientWidth * 0.2) + Clicker.div.clientWidth * 0.2;
+		newGPU.leftValue = newGPU.y + getRandomInt(Clicker.div.clientHeight-Clicker.div.clientHeight* 0.2) + Clicker.div.clientHeight* 0.2;
+		newGPU.topMax = newGPU.topValue + 400 + getRandomInt(100);
+
+		newGPU.style.top = `${newGPU.topValue}px`;
+		newGPU.style.left = `${newGPU.leftValue}px`;
+
+		newGPU.style.transform = `rotate(${getRandomInt(150)}deg)`;
+		newGPU.style.opacity = 1;
+
+		Clicker.fallingObjects.push(newGPU);
+		Clicker.divFallingGPUS.appendChild(newGPU);
+
+		newGPU.interval = setInterval(Clicker.falling(newGPU), 15);
+		setTimeout(Clicker.suprGPU(newGPU), 3000 + getRandomInt(1000));
+	}
+	static falling(GPU) {
+		return () => {
+			GPU.topValue += 2;
+			GPU.style.top = `${GPU.topValue}px`;
+			GPU.style.opacity -= 0.005;
+		};
+	}
+	static suprGPU(GPU) {
+		return () => {
+			clearInterval(GPU.interval);
+			let index = Clicker.fallingObjects.indexOf(GPU);
+			if (index > -1) { 
+				console.log(Clicker.fallingObjects);
+			  	Clicker.fallingObjects.splice(index, 1);
+			  	console.log(Clicker.fallingObjects);
+			}
+			GPU.remove();
+		};
 	}
 }
-class TowerType {
-	constructor(name, pv, power, attackSpeed, range, nbTargetsMax) {
+class Component {
+	constructor(name, value, price) {
 		this.name = name;
-		this.pv = pv;
-		this.power = power;
-		this.attackSpeed = attackSpeed;
-		this.range = range;
-		this.nbTargetsMax = nbTargetsMax;
-		let img = new Image();
-		img.src = `assets/towers/${this.name}/tower.png`;
-		this.img = img;
-
-		this.currentPrice = 10;
 		this.nb = 0;
-		this.button = document.getElementById(`${name}B`);
-		this.isSelected = false;
+		this.value = value;
+		this.currentPrice = price;
+		this.multiplier = 1;
+		this.is_dislay = false;
+		this.createButton();
 	}
-	shootingSprite(state) {
-		let img = new Image();
-		img.src = `assets/towers/${this.name}/shooting${state}.png`;
-		return img;
+	flopParSecComp() {
+		return this.nb * this.value * this.multiplier;
+	}
+	newPrice(nb = 1, selling = false) {
+		this.currentPrice = this.price(nb, selling);
+	}
+	price(nb = 1, selling = false) {
+		if (!selling) {
+			return Math.floor(this.currentPrice * Math.pow(1.15, nb));
+		} else {
+			return Math.floor(this.currentPrice * Math.pow(0.7, nb));
+		}
 	}
 	createButton() {
-		let img = document.createElement("img");
-		img.src = `assets/towers/${this.name}/tower.png`;
-		img.classList.add("buyBImg")
-		let divImg = document.createElement("div");
-		divImg.classList.add("buyBImgZone")
-		divImg.appendChild(img);
-		let name = document.createElement("div");
-		name.classList.add("buyBName");
-		name.textContent = this.name;
-		let price = document.createElement("div");
-		price.classList.add("buyBPrice");
-		price.textContent = this.currentPrice;
-		let nb = document.createElement("div");
-		nb.classList.add("buyBNb");
-		nb.textContent = this.nb;
-		this.button.appendChild(divImg);
-		this.button.appendChild(name);
-		this.button.appendChild(price);
-		this.button.appendChild(nb);
-
-		let isSelected = () => {
-			this.isSelected = !this.isSelected;
-			if (this.isSelected) {
-				this.button.classList.add("isSelected");
-				for (let towerType of Game.towersTypes) {
-					if (towerType.isSelected) {
-						towerType.button.classList.remove("isSelected");
-					}
-				}
-			} else {
-				this.button.classList.remove("isSelected");
-			}
-		}
-		this.button.addEventListener("click", isSelected);
+		let src = `assets/${this.name}.png`;
+		this.button = Game.createButton(src, this);
+		this.button.addEventListener("click", this.buy(1));
 	}
 	updateButton() {
-		this.button.children[2].textContent = this.currentPrice;
-		this.button.children[3].textContent = this.nb;
+		let price = this.button.getElementsByClassName('buyBPrice').item(0);
+		price.textContent = this.currentPrice;
+		let nb = this.button.getElementsByClassName('buyBNb').item(0);
+		nb.textContent = this.nb;
+	}
+	buy(nb) {
+		return () => {
+			let comp = this.name;
+			if (Game.components[comp].currentPrice*nb <= Game.nbGolds) {
+				Game.addGolds(-Game.components[comp].currentPrice*nb);
+				Game.components[comp].nb += nb;
+				for (let i = 0; i < nb; i++) {
+					Game.components[comp].newPrice();
+				}
+				Game.components[comp].updateButton();
+			}
+		};
 	}
 }
-class CellType {
-	constructor(name) {
+class Upgrade {
+	constructor(name, comp, price, value, type, conditions) {
 		this.name = name;
-		this.img = new Image();
-		this.img.src = `assets/cells/${this.name}.png`;
+		this.comp = comp;
+		this.price = price;
+		this.type = type;
+		this.value = value;
+		this.is_for_sell = false;
+		this.is_sold = false;
+		this.conditions = conditions;
+		this.button = document.getElementById(`up`);
+	}
+	buy(up, nb=1) {
+		return () => {
+			if (up.price <= Game.nbFLOPS) {
+				Game.nbFLOPS -= up.price;
+				up.is_for_sell = false;
+				up.is_sold = true;
+
+				Game.components[up.comp].multiplier *= this.value;
+			}
+		};
+	}
+	createButton() {
+		this.button.addEventListener("click", this.buy(this));
+	}
+	respect_conditions() {
+		if (conditions !== undefined) {
+			let iCond = 0;
+			let is_respected = true;
+			while (iCond < conditions.length && is_respected) {
+				is_respected = eval(conditions[iCond]);
+				iCond++;
+			}
+			return is_respected;
+		} else {
+			return true;
+		}
 	}
 }
 class Path {
@@ -701,6 +963,9 @@ class Rectangle {
 	collisionRect(rect) {
 		return this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.height + this.y > rect.y;
 	}
+	collisionPos(pos) {
+		return (pos.x >= this.x && pos.x <= this.x + this.width) && (pos.y >= this.y && pos.y <= this.y + this.height);
+	}
 	floor() {
 		return new Rectangle(Math.floor(this.x), Math.floor(this.y), Math.floor(this.width), Math.floor(this.height));
 	}
@@ -727,175 +992,6 @@ class Circle {
 		return this.distanceRect(rect) <= this.radius;
 	}
 }
-class Clicker {
-	static div;
-	static nbClicks = 0;
-	static clickValue = 1;
-	static fallingObjects = [];
-	static divFallingGPUS;
-
-	static init() {
-		Clicker.div = document.getElementById("clicker");
-		Clicker.divFallingGPUS = document.getElementById("fallingGPUS");
-		Clicker.div.addEventListener("click", Clicker.clickOnClicker);
-	}
-	static clickOnClicker() {
-		Game.nbFLOPS += Clicker.clickValue;
-		Clicker.nbClicks++;
-
-		Clicker.effectsClick();
-	}
-	static effectsClick() {
-		let newGPU = document.createElement("img");
-		newGPU.src = `assets/fallingObj${getRandomInt(2)+1}.png`;
-		newGPU.classList.add("fallingGPU");
-
-		newGPU.topValue = newGPU.x + getRandomInt(Clicker.div.clientWidth-Clicker.div.clientWidth * 0.2) + Clicker.div.clientWidth * 0.2;
-		newGPU.leftValue = newGPU.y + getRandomInt(Clicker.div.clientHeight-Clicker.div.clientHeight* 0.2) + Clicker.div.clientHeight* 0.2;
-		newGPU.topMax = newGPU.topValue + 400 + getRandomInt(100);
-
-		newGPU.style.top = `${newGPU.topValue}px`;
-		newGPU.style.left = `${newGPU.leftValue}px`;
-
-		newGPU.style.transform = `rotate(${getRandomInt(150)}deg)`;
-		newGPU.style.opacity = 1;
-
-		Clicker.fallingObjects.push(newGPU);
-		Clicker.divFallingGPUS.appendChild(newGPU);
-
-		newGPU.interval = setInterval(Clicker.falling(newGPU), 15);
-		setTimeout(Clicker.suprGPU(newGPU), 3000 + getRandomInt(1000));
-	}
-	static falling(GPU) {
-		return () => {
-			GPU.topValue += 2;
-			GPU.style.top = `${GPU.topValue}px`;
-			GPU.style.opacity -= 0.005;
-		};
-	}
-	static suprGPU(GPU) {
-		return () => {
-			clearInterval(GPU.interval);
-			let index = Clicker.fallingObjects.indexOf(GPU);
-			if (index > -1) { 
-			  Clicker.fallingObjects.splice(index, 1);
-			}
-			GPU.remove();
-		};
-	}
-}
-class Component {
-	constructor(name, value, price) {
-		this.name = name;
-		this.nb = 0;
-		this.value = value;
-		this.currentPrice = price;
-		this.multiplier = 1;
-		this.is_dislay = false;
-		this.button = document.getElementById(`${name}B`);
-	}
-	flopParSecComp() {
-		return this.nb * this.value * this.multiplier * Game.globalMultiplier;
-	}
-	newPrice(nb = 1, selling = false) {
-		this.currentPrice = this.price(nb, selling);
-	}
-	price(nb = 1, selling = false) {
-		if (!selling) {
-			return Math.floor(this.currentPrice * Math.pow(1.15, nb));
-		} else {
-			return Math.floor(this.currentPrice * Math.pow(0.7, nb));
-		}
-	}
-	createButton() {
-		let img = document.createElement("img");
-		img.src = `assets/${this.name}.png`;
-		img.classList.add("buyBImg")
-		let divImg = document.createElement("div");
-		divImg.classList.add("buyBImgZone")
-		divImg.appendChild(img);
-		let name = document.createElement("div");
-		name.classList.add("buyBName");
-		name.textContent = this.name;
-		let price = document.createElement("div");
-		price.classList.add("buyBPrice");
-		price.textContent = this.currentPrice;
-		let nb = document.createElement("div");
-		nb.classList.add("buyBNb");
-		nb.textContent = this.nb;
-		this.button.appendChild(divImg);
-		this.button.appendChild(name);
-		this.button.appendChild(price);
-		this.button.appendChild(nb);
-		this.button.addEventListener("click", this.buy(1));
-	}
-	updateButton() {
-		this.button.children[2].textContent = this.currentPrice;
-		this.button.children[3].textContent = this.nb;
-	}
-	buy(nb) {
-		return () => {
-			let comp = this.name;
-			if (Game.components[comp].currentPrice <= Game.nbFLOPS) {
-				Game.nbFLOPS -= Game.components[comp].currentPrice;
-				Game.components[comp].nb += nb;
-				for (let i = 0; i < nb; i++) {
-					Game.components[comp].newPrice();
-				}
-				let img = document.createElement("img");
-				img.src = `assets/${this.name}.png`;
-				let iDeck = 0;
-				while(iDeck < Game.divRack.children.length && Game.divRack.children[iDeck].id != comp + "R") {
-					iDeck += 2;
-				}
-				if (iDeck < Game.divRack.children.length) {
-					Game.divRack.children[iDeck].appendChild(img);
-				}
-				Game.components[comp].updateButton();
-			}
-		};
-	}
-}
-class Upgrade {
-	constructor(name, comp, price, value, type, conditions) {
-		this.name = name;
-		this.comp = comp;
-		this.price = price;
-		this.type = type;
-		this.value = value;
-		this.is_for_sell = false;
-		this.is_sold = false;
-		this.conditions = conditions;
-		this.button = document.getElementById(`up`);
-	}
-	buy(up, nb=1) {
-		return () => {
-			if (up.price <= Game.nbFLOPS) {
-				Game.nbFLOPS -= up.price;
-				up.is_for_sell = false;
-				up.is_sold = true;
-
-				Game.components[up.comp].multiplier *= this.value;
-			}
-		};
-	}
-	createButton() {
-		this.button.addEventListener("click", this.buy(this));
-	}
-	respect_conditions() {
-		if (conditions !== undefined) {
-			let iCond = 0;
-			let is_respected = true;
-			while (iCond < conditions.length && is_respected) {
-				is_respected = eval(conditions[iCond]);
-				iCond++;
-			}
-			return is_respected;
-		} else {
-			return true;
-		}
-	}
-}
 function getValue(element, message) {
 	return function () {
 		showPrompt(message, function (response) {
@@ -916,26 +1012,161 @@ function getRandomInt(max, min) {
 		return Math.floor(Math.random() * max);
 	}
 }
+function romanize(num) {
+    if (isNaN(num))
+        return NaN;
+    var digits = String(+num).split(""),
+        key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+               "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+               "","I","II","III","IV","V","VI","VII","VIII","IX"],
+        roman = "",
+        i = 3;
+    while (i--)
+        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    return Array(+digits.join("") + 1).join("M") + roman;
+}
 function getBaseLog(x, y) {
   return Math.log(y) / Math.log(x);
 }
-function showPrompt(message, callback) {
-	const promptOverlay = document.getElementById("customPrompt");
-	const promptMessage = document.getElementById("promptMessage");
-	const promptInput = document.getElementById("promptInput");
+class LootBox {
+	static divCards;
+	static divCard1;
+	static divCard2;
+	static divCard3;
+	static cardsUpgrades = [];
 
-	promptMessage.textContent = message;
-	promptInput.value = ""; // Reset the input field
-	promptOverlay.classList.remove("hidden");
+	static init() {
+		LootBox.divCards = document.getElementById("cards");
 
-	submitPrompt = function () {
-	const userInput = promptInput.value;
-		promptOverlay.classList.add("hidden");
-		if (callback) callback(userInput);
-	};
+		LootBox.divCard1 = document.getElementById("card1");
+		LootBox.divCard2 = document.getElementById("card2");
+		LootBox.divCard3 = document.getElementById("card3");		
 
-	closePrompt = function () {
-		promptOverlay.classList.add("hidden");
-		if (callback) callback(null);
-	};
+		LootBox.divCard1.addEventListener("click", LootBox.choseCard(0));
+		LootBox.divCard2.addEventListener("click", LootBox.choseCard(1));
+		LootBox.divCard3.addEventListener("click", LootBox.choseCard(2));
+	}
+	static generate() {
+		LootBox.divCards.classList.remove("hidden");
+		let upgradesAvailable = [];
+		for (let iTowerType in Game.towersTypes) {
+			for (let upgrade of Game.towersTypes[iTowerType].upgradesAvailable) {
+				upgradesAvailable.push({'targetName': Game.towersTypes[iTowerType].name, 'upgradeName': upgrade});
+			}
+		}
+		console.log(upgradesAvailable);
+		let nbCard;
+		switch (upgradesAvailable.length) {
+			case 0 :
+				nbCard = 0
+				LootBox.divCards.classList.add("hidden");
+				LootBox.divCard1.classList.add("hidden");
+				break;
+			case 1 :
+				nbCard = 1
+				LootBox.divCard2.classList.add("hidden");
+				break;
+			case 2 :
+				nbCard = 2
+				LootBox.divCard3.classList.add("hidden");
+					break;
+			default :
+				nbCard = 3;
+				break;
+		}
+		for (let i = 0; i < nbCard; i++) {
+			let iUpgrade = getRandomInt(upgradesAvailable.length);
+			LootBox.modifyCard(i+1, upgradesAvailable[iUpgrade].targetName, upgradesAvailable[iUpgrade].upgradeName);
+			LootBox.cardsUpgrades[i] = upgradesAvailable[iUpgrade];
+			upgradesAvailable.splice(iUpgrade, 1);
+		}
+	}
+	static modifyCard(nb, targetName, upgradeName) {
+		let card = LootBox["divCard"+nb];
+		card.children[0].textContent = Game.towersUpgrades[upgradeName].title(targetName);
+		card.children[1].textContent = Game.towersUpgrades[upgradeName].description(targetName);
+	}
+	static choseCard(i) {
+		return () => {
+			LootBox.divCards.classList.add("hidden");
+			let cardUpgrade = LootBox.cardsUpgrades[i];
+			Game.towersUpgrades[cardUpgrade.upgradeName].apply(cardUpgrade.targetName);
+		}
+	}
+}
+class TowerUpgrade {
+	constructor (name, property, type, values, ...targets) {
+		this.name = name;
+		this.property = property;
+		this.type = type;
+		this.values = values;
+		this.targets = [];
+		for (let target of targets) {
+			this.targets[target] = {'name': target, 'step': 0};
+			Game.towersTypes[target].upgradesAvailable.push(this.name);
+		}
+		this.nbSteps = values.length;
+	}
+	apply(targetName) {
+		if (Object.keys(this.targets).includes(targetName) && this.targets[targetName].step != this.nbSteps) {
+			if (this.type == "a") {
+				Game.towersTypes[targetName][this.property].bonusValue += this.values[this.targets[targetName].step];
+				this.targets[targetName].step++;
+			} else {
+				Game.towersTypes[targetName][this.property].multiplier += this.values[this.targets[targetName].step]/100;
+				this.targets[targetName].step++;
+			}
+			if (this.isFinished(targetName)) {
+				let index = Game.towersTypes[targetName].upgradesAvailable.indexOf(this.name);
+				Game.towersTypes[targetName].upgradesAvailable.splice(index, 1);
+			}
+			for (let tower of Arena.towers) {
+				if (tower.type == targetName) {
+					tower.updateStats();
+				}
+			}
+		}
+	}
+	description(targetName) {
+		if (Object.keys(this.targets).includes(targetName) && this.targets[targetName].step != this.nbSteps) {
+			let value = this.values[this.targets[targetName].step];
+			targetName =  targetName[0].toUpperCase() + targetName.slice(1).toLowerCase();
+			let property;
+			switch (this.property) {
+				case "nbTargetsMax":
+					property = "max target";
+				break;
+				case "attackSpeed":
+					property = "attack speed";
+				break;
+				case "power":
+					property = "power";
+				break;
+			}
+			if (this.type=="a") {
+				return `The ${targetName}s gain ${value} ${property}`;
+			} else {
+				return `The ${targetName}s gain ${value}% ${property}`;
+			}
+		}
+	}
+	title(targetName) {
+		if (Object.keys(this.targets).includes(targetName) && this.targets[targetName].step != this.nbSteps) {
+			let title = this.name + " " + romanize(this.targets[targetName].step+1);
+			return title;
+		}
+	}
+	isFinished(targetName) {
+		return this.targets[targetName].step == this.nbSteps;
+	}
+}
+class TowerStat {
+	constructor (baseValue) {
+		this.baseValue = baseValue;
+		this.multiplier = 1;
+		this.bonusValue = 0;
+	}
+	value() {
+		return (this.baseValue + this.bonusValue) * this.multiplier;
+	}
 }
