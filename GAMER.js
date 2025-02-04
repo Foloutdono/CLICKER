@@ -599,7 +599,7 @@ class Unit {
 		Arena.units = Arena.units.filter(a => a.ID != this.ID);
 	}
 	win() {
-		Game.addPv(this.pv);
+		Game.addPv(-this.pv);
 	}
 }
 class Wave {
@@ -992,42 +992,6 @@ class Circle {
 		return this.distanceRect(rect) <= this.radius;
 	}
 }
-function getValue(element, message) {
-	return function () {
-		showPrompt(message, function (response) {
-			if (response === null) {
-				console.log("User canceled the prompt.");
-			} else {
-				element.textContent = response;
-			}
-		});
-	}
-}
-function getRandomInt(max, min) {
-	if (min) {
-		const minCeiled = Math.ceil(min);
-		const maxFloored = Math.floor(max);
-		return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
-	} else {
-		return Math.floor(Math.random() * max);
-	}
-}
-function romanize(num) {
-    if (isNaN(num))
-        return NaN;
-    var digits = String(+num).split(""),
-        key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
-               "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
-               "","I","II","III","IV","V","VI","VII","VIII","IX"],
-        roman = "",
-        i = 3;
-    while (i--)
-        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
-    return Array(+digits.join("") + 1).join("M") + roman;
-}
-function getBaseLog(x, y) {
-  return Math.log(y) / Math.log(x);
-}
 class LootBox {
 	static divCards;
 	static divCard1;
@@ -1060,11 +1024,11 @@ class LootBox {
 			case 0 :
 				nbCard = 0
 				LootBox.divCards.classList.add("hidden");
-				LootBox.divCard1.classList.add("hidden");
 				break;
 			case 1 :
 				nbCard = 1
 				LootBox.divCard2.classList.add("hidden");
+				LootBox.divCard3.classList.add("hidden");
 				break;
 			case 2 :
 				nbCard = 2
@@ -1169,4 +1133,47 @@ class TowerStat {
 	value() {
 		return (this.baseValue + this.bonusValue) * this.multiplier;
 	}
+}
+
+
+
+
+
+
+////
+function getValue(element, message) {
+	return function () {
+		showPrompt(message, function (response) {
+			if (response === null) {
+				console.log("User canceled the prompt.");
+			} else {
+				element.textContent = response;
+			}
+		});
+	}
+}
+function getRandomInt(max, min) {
+	if (min) {
+		const minCeiled = Math.ceil(min);
+		const maxFloored = Math.floor(max);
+		return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+	} else {
+		return Math.floor(Math.random() * max);
+	}
+}
+function romanize(num) {
+    if (isNaN(num))
+        return NaN;
+    var digits = String(+num).split(""),
+        key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+               "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+               "","I","II","III","IV","V","VI","VII","VIII","IX"],
+        roman = "",
+        i = 3;
+    while (i--)
+        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    return Array(+digits.join("") + 1).join("M") + roman;
+}
+function getBaseLog(x, y) {
+  return Math.log(y) / Math.log(x);
 }
